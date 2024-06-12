@@ -1,9 +1,12 @@
 type IStorage = {
     count: number;
+    tab_limit: number;
 };
 
 const defaultStorage: IStorage = {
     count: 0,
+    tab_limit: 7,
+    
 };
 
 export const storage = {
