@@ -1,8 +1,8 @@
 <script lang="ts">
   import { storage } from "../storage";
 
-  export let count: number;
-  export let tab_limit: number;
+  export let count: number = 0;
+  export let tab_limit: number = 7;
   let successMessage: string | null = null;
 
   function increment() {
@@ -14,14 +14,8 @@
   }
 
   function save() {
-    storage.set({ count }).then(() => {
-      successMessage = "Options saved!";
-
-      setTimeout(() => {
-        successMessage = null;
-      }, 1500);
-    });
-    storage.set({ tab_limit }).then(() => {
+    const storageData = { count, tab_limit };
+    storage.set(storageData).then(() => {
       successMessage = "Options saved!";
 
       setTimeout(() => {
