@@ -1,11 +1,11 @@
 {
-    "name": "chrome-extension-svelte-typescript-boilerplate",
-    "description": "Boilerplate for Chrome Extension Svelte Typescript project",
+    "name": "TabStack",
+    "description": "A Working Memory Friendly Tab Manager",
     "version": "1.0.0",
     "type": "module",
     "repository": {
         "type": "git",
-        "url": "https://github.com/nekitcorp/chrome-extension-svelte-typescript-boilerplate.git"
+        "url": "https://github.com/skewballfox/TabStack.git"
     },
     "scripts": {
         "dev": "vite",
@@ -14,7 +14,7 @@
     },
     "devDependencies": {
         "@crxjs/vite-plugin": "2.0.0-beta.18",
-        "@sveltejs/vite-plugin-svelte": "2.4.5",
+        "@sveltejs/vite-plugin-svelte": "^3.1.2",
         "@tsconfig/svelte": "5.0.2",
         "@types/chrome": "0.0.243",
         "svelte": "4.2.19",

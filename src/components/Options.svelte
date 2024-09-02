@@ -1,21 +1,12 @@
 <script lang="ts">
-  import { storage } from "../storage";
+  import { storage, type Config } from "../storage";
 
-  export let count: number = 0;
   export let tab_limit: number = 7;
   let successMessage: string | null = null;
 
-  function increment() {
-    count += 1;
-  }
-
-  function decrement() {
-    count -= 1;
-  }
-
   function save() {
-    const storageData = { count, tab_limit };
-    storage.set(storageData).then(() => {
+    const config = { tab_limit };
+    storage.set_config(config).then(() => {
       successMessage = "Options saved!";
 
       setTimeout(() => {
@@ -26,10 +17,8 @@
 </script>
 
 <div class="container">
-  <p>Current count: <b>{count}</b></p>
   <div>
-    <button on:click={decrement}>-</button>
-    <button on:click={increment}>+</button>
+    <label for="tab_limit">Set Tab Limit:</label>
     <input type="number" bind:value={tab_limit} />
     <button on:click={save}>Save</button>
     {#if successMessage}<span class="success">{successMessage}</span>{/if}

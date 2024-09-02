@@ -8,10 +8,10 @@ function render() {
     const target = document.getElementById("app");
 
     if (target) {
-        storage.get().then(({ count }) => {
+        storage.get().then(({ tab_limit }) => {
             new Options({
                 target,
-                props: { count },
+                props: { tab_limit },
             });
         });
     }
