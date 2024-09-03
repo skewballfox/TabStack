@@ -22,8 +22,8 @@ import { storage } from "../storage";
 //     }
 //     chrome.tabs.query({ currentWindow: true }, function (tabs) {
 //         tabs.forEach(tab => {
-            
-            
+
+
 //         });
 //     }
 //     //get the current stack
@@ -59,46 +59,40 @@ import { storage } from "../storage";
 //   }
 function openNewNamedStack() {
     //TODO: popup a window to get the name of the new stack
-    
+
     //TODO: Save the currently open tabs to the current stack
     //TODO: Set the active stack to new name, Close currently all active tabs 
-    
+
 }
 
 /// called when a new tab is created, either pushes the tab to the current stack
 /// or closes the tab if the tab limit has been reached
 async function tryPushStack(newTab: chrome.tabs.Tab) {
     //first check if the tab limit has been reached
-    let data = await storage.get();
-    
-    let current = data.stack_list.currentStack;
+    const data = await storage.get();
     console.log(data)
-    if (data.tab_limit!=0 && data.stack_list.stacks[current].tabs.length >= data.tab_limit) {
-        //if the tab limit has been reached, close the new tab
-        
+    chrome.tabs.query({ currentWindow: true }, (tabs) => {
+        console.log(tabs)
+        if (tabs.length >= data.tab_limit) {
+            // If the tab limit has been reached, close the new tab
             console.log("here")
-            if (newTab.id !== undefined) {
-                chrome.tabs.remove(newTab.id);
+            if (newTab.id) {
+                chrome.tabs.remove(newTab.id); // Close the new tab if it has a valid ID
             }
-        
-    } else {
-        //if it hasn't been reached, push the new tab to the current stack
-        data.stack_list.stacks[current].tabs.push(newTab);
-
-    }
+        }
+    });
 }
 
-chrome.tabs.onCreated.addListener(tryPushStack);
 
-chrome.runtime.onInstalled.addListener( () => {
+chrome.runtime.onInstalled.addListener(() => {
     // populate the default stack
-        storage.get().then(console.log)
-        chrome.tabs.query({ currentWindow: true }).then(tabs => {
-            tabs.forEach(tab => {
-                tryPushStack(tab).then(() => {  });
-            });
-        });
+    storage.get().then(console.log)
+    // Set up listener for tab creation
+    chrome.tabs.onCreated.addListener((tab) => {
+        console.log("New tab created:", tab.id);
+        tryPushStack(tab);
     });
+});
 
 
 
