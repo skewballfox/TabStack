@@ -68,25 +68,36 @@ function openNewNamedStack() {
 /// called when a new tab is created, either pushes the tab to the current stack
 /// or closes the tab if the tab limit has been reached
 async function tryPushStack(newTab: chrome.tabs.Tab) {
-    //first check if the tab limit has been reached
+    // first check if the tab limit has been reached
     const data = await storage.get();
     console.log(data)
-    chrome.tabs.query({ currentWindow: true }, (tabs) => {
-        console.log(tabs)
-        if (tabs.length >= data.tab_limit) {
-            // If the tab limit has been reached, close the new tab
-            console.log("here")
-            if (newTab.id) {
-                chrome.tabs.remove(newTab.id); // Close the new tab if it has a valid ID
-            }
+    const tabs = data.stack_list.stacks[data.stack_list.currentStack].tabs
+    if (tabs.length >= data.tab_limit) {
+        // If the tab limit has been reached, close the new tab
+        console.log("here")
+        if (newTab.id) {
+            chrome.tabs.remove(newTab.id); // Close the new tab if it has a valid ID
         }
-    });
+    } else {
+        tabs.push(newTab);
+    }
+    storage.set(data)
 }
 
-
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(async () => {
     // populate the default stack
-    storage.get().then(console.log)
+    const data = await storage.get();
+    console.log(data)
+
+    // initialize the stacks with the current tabs
+    async function initializeStacks() {
+        const tabs = await chrome.tabs.query({ currentWindow: true });
+        data.stack_list.stacks[data.stack_list.currentStack].tabs = tabs;
+        storage.set(data)
+    }
+
+    await initializeStacks()
+
     // Set up listener for tab creation
     chrome.tabs.onCreated.addListener((tab) => {
         console.log("New tab created:", tab.id);
