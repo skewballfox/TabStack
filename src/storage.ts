@@ -19,7 +19,7 @@ const defaultStorage: IStorage = {
     
 };
 
-interface StackList {
+export interface StackList {
     stacks: Record<string, Stack>
     currentStack: string
 }

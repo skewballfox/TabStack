@@ -1,4 +1,4 @@
-import Options from "../components/Options.svelte";
+import StackList from "../components/StackList.svelte";
 import { storage } from "../storage";
 
 // Side panel
@@ -8,10 +8,10 @@ function render() {
     const target = document.getElementById("app");
 
     if (target) {
-        storage.get().then(({ count }) => {
-            new Options({
+        storage.get().then(({ stack_list }) => {
+            new StackList({
                 target,
-                props: { count },
+                props: { stack_list },
             });
         });
     }
