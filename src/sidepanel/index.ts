@@ -11,7 +11,6 @@ function render() {
         storage.get().then(({ stack_list }) => {
             new StackList({
                 target,
-                props: { stack_list },
             });
         });
     }

@@ -19,6 +19,7 @@ export const defaultStackList: StackList = {
     currentStack: "default"
 };
 
+/// Svlete store for a copy of the stack list, updates when the chrome storage is updated
 export const stack_list: Writable<StackList> = writable(defaultStackList);
 
 const defaultStorage: IStorage = {
