@@ -1,17 +1,37 @@
 <script lang="ts">
-  import { storage, type StackList } from "../storage";
+  import { writable, derived, type Writable } from "svelte/store";
+  import {
+    storage,
+    type StackList,
+    tryAddStack,
+    defaultStackList,
+    stack_list,
+  } from "../storage";
+  import MaterialSymbolsAdd from "~icons/material-symbols/add";
   import { onMount } from "svelte";
 
-  let stack_list: StackList;
+  export const searchQuery = writable("");
+
   onMount(() => {
-    storage.get().then((storage) => (stack_list = storage.stack_list));
+    storage.get().then((storage) => stack_list.set(storage.stack_list));
   });
-  let searchQuery = "";
+
+  export const filtered_res = derived(
+    [searchQuery, stack_list],
+    ([$searchQuery, $stack_list]) =>
+      Object.entries($stack_list.stacks)
+        .filter(([stack, _]) =>
+          stack.toLowerCase().includes($searchQuery.toLowerCase())
+        )
+        .sort((a, b) => a[0].localeCompare(b[0]))
+  );
 
   function filterStacks() {
-    return Object.entries(stack_list.stacks).filter(([stack, _]) =>
-      stack.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    return Object.entries($stack_list.stacks)
+      .filter(([stack, _]) =>
+        stack.toLowerCase().includes($searchQuery.toLowerCase())
+      )
+      .sort((a, b) => a[0].localeCompare(b[0]));
   }
 </script>
 
@@ -26,18 +46,21 @@ Desired functionality:
 -->
 
 <!-- https://kit.svelte.dev/docs/form-actions#progressive-enhancement -->
-<input
-  type="text"
-  bind:value={searchQuery}
-  on:change={filterStacks}
-  placeholder="Search stacks..."
-/>
+
+<input type="text" bind:value={$searchQuery} placeholder="Search stacks..." />
 
 <ul>
-  {#each filterStacks() as stack}
-    <li class="stack-item">{stack}</li>
+  {#each $filtered_res as [stack_name, _], i}
+    <li class="stack-item">
+      <button on:click={() => console.log(stack_name)}>
+        {stack_name}
+      </button>
+    </li>
   {/each}
 </ul>
+<!-- TODO: having a plus won't work to well, may want to instead have text pop up 
+ if no match (add new stack or somethign) -->
+<MaterialSymbolsAdd onclick={() => tryAddStack($searchQuery)} />
 
 <style>
   .stack-item {
