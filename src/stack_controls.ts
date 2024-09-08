@@ -1,5 +1,6 @@
 import { storage } from "./storage";
 
+
 /// Used to create a new stack with the given name, returns false if the stack already exists
 /// or is an empty string
 /// Returns true if the stack was successfully created
@@ -24,7 +25,7 @@ export async function SaveCurrentStack() {
     const data = await storage.get();
     const tabs = await chrome.tabs.query({ currentWindow: true });
     
-    
+    console.log("tabs: ", tabs);
     data.stack_list.stacks[data.stack_list.currentStack].tabs = tabs;
     storage.set(data);
 }
@@ -36,7 +37,7 @@ export async function SaveCurrentStack() {
 /// Returns false if the stack is the same as the current stack or the stack does not exist
 /// Returns true if the stack was successfully switched
 export async function switchStack(stackName: string) {
-    SaveCurrentStack();
+    await SaveCurrentStack();
     //create placeholder for new stack
     const data = await storage.get();
     if (data.stack_list.currentStack === stackName||!data.stack_list.stacks[stackName]) {
@@ -68,4 +69,8 @@ export async function CreateAndSwitchStack(stackName: string) {
     if (success) {
         return await switchStack(stackName);
     }
+}
+
+export async function getBestMatch(searchQuery: string) {
+
 }

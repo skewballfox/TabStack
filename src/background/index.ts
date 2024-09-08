@@ -1,6 +1,8 @@
 import { get } from "svelte/store";
-import { storage,defaultStorage } from "../storage";
+import { storage, defaultStorage } from "../storage";
+import searchScript from "../content/search?script"
 import { SaveCurrentStack } from "../stack_controls";
+
 
 //const browser = chrome || browser
 
@@ -25,8 +27,15 @@ import { SaveCurrentStack } from "../stack_controls";
 //     }
 //   }
 
+enum Command {
+    SearchStacks = "search-stacks",
+    pushTabToStack = "push_tab_to_stack",
+}
 
-
+// function search() {
+//     //document.body.style.backgroundColor = 'rgba(232, 240, 254, 0.4)';
+//     new StackList({ target: document.body });
+// }
 
 
 
@@ -69,13 +78,13 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
     // initialize the stacks with the current tabs
     async function initializeStacks() {
-        let data = await storage.get();
+        let data = defaultStorage;
         const tabs = await chrome.tabs.query({ currentWindow: true });
         data.stack_list.stacks[data.stack_list.currentStack].tabs = tabs;
         await storage.set(data)
     }
-
-    if (details.reason === "install") {
+    
+    if (details.reason === "install"||details.reason === "update") {
         // Initialize the stack list
         await initializeStacks();
     }
@@ -85,6 +94,20 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     chrome.tabs.onCreated.addListener((tab) => {
         console.log("New tab created:", tab.id);
         tryOpenTab(tab);
+    });
+
+    chrome.commands.onCommand.addListener(async (command,current_tab) => {
+        console.log("Command:", command);
+        console.log("Current tab:", current_tab);
+        if (command === Command.SearchStacks) {
+            if (current_tab.id) {
+                console.log("Executing search script");
+                chrome.scripting.executeScript({
+                    target: { tabId: current_tab.id },
+                    files: [searchScript],
+                })
+            }
+        }
     });
 });
 

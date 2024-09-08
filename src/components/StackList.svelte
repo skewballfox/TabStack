@@ -1,11 +1,5 @@
 <script lang="ts">
-  import { writable, derived } from "svelte/store";
-  import {
-    searchQuery,
-    filtered_res,
-    storage,
-    defaultStackList,
-  } from "../storage";
+  import { searchQuery, filtered_res, storage, stack_list } from "../storage";
   import { CreateAndSwitchStack, tryCreateNewStack } from "../stack_controls";
   import MaterialSymbolsAdd from "~icons/material-symbols/add";
   import { onMount } from "svelte";
@@ -13,8 +7,29 @@
 
   //https://stackoverflow.com/a/65616230
   let query = "";
+  export const searchHandler = (e: KeyboardEvent) => {
+    if ($filtered_res.length === 0) {
+      if (e.ctrlKey) {
+        let success = tryCreateNewStack(query);
+      } else {
+        CreateAndSwitchStack(query);
+      }
+    } else {
+      // if the user submits a partial match, open the first match
+      switchStack($filtered_res[0][0]);
+    }
+  };
+
+  export const stackClickHandler = (stack_name: string) => {
+    switchStack(stack_name);
+  };
 
   $: searchQuery.set(query);
+  onMount(() => {
+    storage.get().then((res) => {
+      stack_list.set(res.stack_list);
+    });
+  });
 </script>
 
 <!--
@@ -28,46 +43,47 @@ Desired functionality:
 -->
 
 <!-- https://kit.svelte.dev/docs/form-actions#progressive-enhancement -->
-
-<input
-  type="text"
-  bind:value={query}
-  placeholder="Search stacks..."
-  on:keydown={(e) => {
-    if (e.key === "Enter") {
-      if (e.ctrlKey) {
-        let success = tryCreateNewStack(query);
-      } else {
-        CreateAndSwitchStack(query);
+<div class="stack-list">
+  <input
+    type="text"
+    bind:value={query}
+    placeholder="Search stacks..."
+    on:keydown={(e) => {
+      if (e.key === "Enter") {
+        // if the stack was created, clear the query
+        query = "";
+        storage.get().then((res) => {
+          console.log(res);
+        });
       }
-      // if the stack was created, clear the query
-      query = "";
-      storage.get().then((res) => {
-        console.log(res);
-      });
-    }
-  }}
-/>
+    }}
+  />
 
-<ul>
-  {#each $filtered_res as [stack_name, _], i}
-    <li class="stack-item">
-      <button on:click={() => switchStack(stack_name)}>
-        {stack_name}
-      </button>
-    </li>
-  {/each}
-</ul>
-<!-- TODO: having a plus won't work to well, may want to instead have text pop up 
+  <ul>
+    {#each $filtered_res as [stack_name, is_current], i}
+      <li class={is_current ? "current-stack" : "stack-item"}>
+        <button on:click={() => stackClickHandler}>
+          {stack_name}
+        </button>
+      </li>
+    {/each}
+  </ul>
+  <!-- TODO: having a plus won't work to well, may want to instead have text pop up 
  if no match (add new stack or somethign) -->
-<MaterialSymbolsAdd
-  onclick={() => {
-    tryCreateNewStack(query);
-    query = "";
-  }}
-/>
+  <MaterialSymbolsAdd
+    onclick={() => {
+      tryCreateNewStack(query);
+      query = "";
+    }}
+  />
+</div>
 
 <style>
+  .current-stack {
+    background-color: #fce;
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
+  }
   .stack-item {
     padding: 8px;
     border-bottom: 1px solid #ccc;

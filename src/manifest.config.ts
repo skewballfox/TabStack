@@ -47,5 +47,15 @@ export default defineManifest(async (env) => ({
             "128": "src/assets/icons/icon-128.png",
         },
     },
-    permissions: ["storage", "sidePanel","tabs"] as chrome.runtime.ManifestPermissions[],
+    commands: {
+        'search-stacks': {
+            suggested_key: {
+                default: "Alt+T"
+                
+            },
+            description: "Search through stacks. Used to quickly switch between stacks."
+            
+        }
+    },
+    permissions: ["storage", "sidePanel","tabs", "scripting","activeTab"] as chrome.runtime.ManifestPermissions[],
 }));

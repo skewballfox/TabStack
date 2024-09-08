@@ -29,7 +29,7 @@ export const filtered_res = derived(
       Object.entries($stack_list.stacks)
         .filter(([stack, _]) =>
           stack.toLowerCase().includes($searchQuery.toLowerCase())
-        )
+        ).map(([stack_name, _]): [string,boolean]  => [stack_name, stack_name===$stack_list.currentStack])
         .sort((a, b) => a[0].localeCompare(b[0]))
 );
 
