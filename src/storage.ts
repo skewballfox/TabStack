@@ -1,4 +1,4 @@
-import { writable, type Writable } from "svelte/store";
+import { derived, writable, type Writable } from "svelte/store";
 
 
 type IStorage = {
@@ -19,10 +19,21 @@ export const defaultStackList: StackList = {
     currentStack: "default"
 };
 
+export const searchQuery = writable("");
 /// Svlete store for a copy of the stack list, updates when the chrome storage is updated
 export const stack_list: Writable<StackList> = writable(defaultStackList);
 
-const defaultStorage: IStorage = {
+export const filtered_res = derived(
+    [searchQuery, stack_list],
+    ([$searchQuery, $stack_list]) =>
+      Object.entries($stack_list.stacks)
+        .filter(([stack, _]) =>
+          stack.toLowerCase().includes($searchQuery.toLowerCase())
+        )
+        .sort((a, b) => a[0].localeCompare(b[0]))
+);
+
+export const defaultStorage: IStorage = {
     stack_list: defaultStackList,
     tab_limit: 7,
     
@@ -37,21 +48,6 @@ interface Stack {
     tabs: chrome.tabs.Tab[];
 }
 
-/// Used to create a new stack, returns false if the stack already exists
-export async function tryAddStack(stackName: string) {
-    const data = await storage.get();
-    console.log(data)
-    
-    if (data.stack_list.stacks[stackName]) {
-        return false;
-    }
-    data.stack_list.stacks[stackName] = {
-        tabs: []
-    };
-    await storage.set(data)
-    
-    return true;
-}
 
 
 interface Tab {
@@ -61,7 +57,7 @@ interface Tab {
 
 export const storage = {
     get: (): Promise<IStorage> =>
-        chrome.storage.sync.get(defaultStorage) as Promise<IStorage>,
+        chrome.storage.sync.get() as Promise<IStorage>,
     get_config: (): Promise<Config> => chrome.storage.sync.get("tab_limit").then((value) => value.tab_limit),
     set_config: (config: Config): Promise<void> => chrome.storage.sync.set({ tab_limit: config.tab_limit }),
     set: (value: IStorage): Promise<void> => {

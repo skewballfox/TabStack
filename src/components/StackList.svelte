@@ -1,38 +1,20 @@
 <script lang="ts">
-  import { writable, derived, type Writable } from "svelte/store";
+  import { writable, derived } from "svelte/store";
   import {
+    searchQuery,
+    filtered_res,
     storage,
-    type StackList,
-    tryAddStack,
     defaultStackList,
-    stack_list,
   } from "../storage";
+  import { CreateAndSwitchStack, tryCreateNewStack } from "../stack_controls";
   import MaterialSymbolsAdd from "~icons/material-symbols/add";
   import { onMount } from "svelte";
+  import { switchStack } from "../stack_controls";
 
-  export const searchQuery = writable("");
+  //https://stackoverflow.com/a/65616230
+  let query = "";
 
-  onMount(() => {
-    storage.get().then((storage) => stack_list.set(storage.stack_list));
-  });
-
-  export const filtered_res = derived(
-    [searchQuery, stack_list],
-    ([$searchQuery, $stack_list]) =>
-      Object.entries($stack_list.stacks)
-        .filter(([stack, _]) =>
-          stack.toLowerCase().includes($searchQuery.toLowerCase())
-        )
-        .sort((a, b) => a[0].localeCompare(b[0]))
-  );
-
-  function filterStacks() {
-    return Object.entries($stack_list.stacks)
-      .filter(([stack, _]) =>
-        stack.toLowerCase().includes($searchQuery.toLowerCase())
-      )
-      .sort((a, b) => a[0].localeCompare(b[0]));
-  }
+  $: searchQuery.set(query);
 </script>
 
 <!--
@@ -47,12 +29,30 @@ Desired functionality:
 
 <!-- https://kit.svelte.dev/docs/form-actions#progressive-enhancement -->
 
-<input type="text" bind:value={$searchQuery} placeholder="Search stacks..." />
+<input
+  type="text"
+  bind:value={query}
+  placeholder="Search stacks..."
+  on:keydown={(e) => {
+    if (e.key === "Enter") {
+      if (e.ctrlKey) {
+        let success = tryCreateNewStack(query);
+      } else {
+        CreateAndSwitchStack(query);
+      }
+      // if the stack was created, clear the query
+      query = "";
+      storage.get().then((res) => {
+        console.log(res);
+      });
+    }
+  }}
+/>
 
 <ul>
   {#each $filtered_res as [stack_name, _], i}
     <li class="stack-item">
-      <button on:click={() => console.log(stack_name)}>
+      <button on:click={() => switchStack(stack_name)}>
         {stack_name}
       </button>
     </li>
@@ -60,7 +60,12 @@ Desired functionality:
 </ul>
 <!-- TODO: having a plus won't work to well, may want to instead have text pop up 
  if no match (add new stack or somethign) -->
-<MaterialSymbolsAdd onclick={() => tryAddStack($searchQuery)} />
+<MaterialSymbolsAdd
+  onclick={() => {
+    tryCreateNewStack(query);
+    query = "";
+  }}
+/>
 
 <style>
   .stack-item {
