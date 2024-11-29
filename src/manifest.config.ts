@@ -22,12 +22,13 @@ export default defineManifest(async (env) => ({
         "48": "src/assets/icons/icon-48.png",
         "128": "src/assets/icons/icon-128.png",
     },
-    // content_scripts: [
-    //     {
-    //         matches: ["https://*/*"],
-    //         js: ["src/content/index.ts"],
-    //     },
-    // ],
+    content_scripts: [
+        {
+            matches: ["<all_urls>"],
+            "match_about_blank": true,
+            js: ["src/content/index.ts"],
+        },
+    ],
     background: {
         service_worker: "src/background/index.ts",
     },
@@ -47,6 +48,8 @@ export default defineManifest(async (env) => ({
             "128": "src/assets/icons/icon-128.png",
         },
     },
+    // Note: when refactoring for firefox support, check this list for unusable keyboad shortcuts
+    // https://support.mozilla.org/en-US/kb/keyboard-shortcuts-perform-firefox-tasks-quickly
     commands: {
         'search-stacks': {
             suggested_key: {

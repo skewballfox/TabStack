@@ -1,7 +1,9 @@
 import { get } from "svelte/store";
 import { storage, defaultStorage } from "../storage";
-import searchScript from "../content/search?script"
-import { SaveCurrentStack } from "../stack_controls";
+// more info on using dynamic content scripts with vite:
+// https://dev.to/jacksteamdev/advanced-config-for-rpce-3966#dynamic-content-scripts
+//import searchScript from "../content/search?script"
+import {  stack_control_request_handler, type ControlAction } from "../stack_controls";
 
 
 //const browser = chrome || browser
@@ -96,24 +98,56 @@ chrome.runtime.onInstalled.addListener(async (details) => {
         tryOpenTab(tab);
     });
 
-    chrome.commands.onCommand.addListener(async (command,current_tab) => {
+    // Set up listener for tab removal
+    // relevant docs: https://developer.chrome.com/docs/extensions/develop/concepts/content-scripts#programmatic
+    chrome.commands.onCommand.addListener(async (command, current_tab) => {
         console.log("Command:", command);
         console.log("Current tab:", current_tab);
         if (command === Command.SearchStacks) {
-            if (current_tab.id) {
-                console.log("Executing search script");
-                chrome.scripting.executeScript({
-                    target: { tabId: current_tab.id },
-                    files: [searchScript],
-                })
-            }
+            await sidePanelSearchHandler(current_tab);
         }
     });
+
+    chrome.runtime.onMessage.addListener(
+        async function (request: ControlAction, sender, _) {
+            console.log(sender.tab ?
+                "from a content script:" + sender.tab.url :
+                "from the extension");
+            stack_control_request_handler(request, sender);
+        }
+    );
 });
 
+async function sidePanelSearchHandler(current_tab: chrome.tabs.Tab) {
+    await chrome.sidePanel.open({ tabId: current_tab.id, windowId: current_tab.windowId });
+    const current_id = current_tab.id;
+    if (current_tab.id) {
+        console.log("Executing search script");
+        chrome.tabs.sendMessage(current_tab.id, { greeting: "open" });
+
+    }
+
+    chrome.tabs.onActivated.addListener(function closeOnTabSwitch(activeInfo)  { 
+        
+        
+        if (activeInfo.tabId !== current_id) {
+            chrome.runtime.sendMessage('closeSidePanel').then(() => {
+                chrome.tabs.onActivated.removeListener(closeOnTabSwitch);
+            });
+        }
+        
+    });
+}
 
 
 
+async function overlaySearchHandler(current_tab: chrome.tabs.Tab) {
+    if (current_tab.id) {
+        console.log("Executing search script");
+        chrome.tabs.sendMessage(current_tab.id, { greeting: "open" });
+
+    }
+}
 // NOTE: If you want to toggle the side panel from the extension's action button,
 // you can use the following code:
 // chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })

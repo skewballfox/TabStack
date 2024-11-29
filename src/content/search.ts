@@ -1,14 +1,14 @@
-import StackList from "../components/StackList.svelte";
+import Overlay from "../components/Overlay.svelte";
 
 
 // Content scripts
 // https://developer.chrome.com/docs/extensions/mv3/content_scripts/
 
 // Some global styles on the page
-import "./styles.css";
+//import "./styles.css";
 
 // Some JS on the page
 //storage.get().then(console.log);
 
 // Some svelte component on the page
-new StackList({ target: document.body });
+new Overlay({target: document.body});

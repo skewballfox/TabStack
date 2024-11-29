@@ -1,34 +1,60 @@
 <script lang="ts">
   import { searchQuery, filtered_res, storage, stack_list } from "../storage";
-  import { CreateAndSwitchStack, tryCreateNewStack } from "../stack_controls";
+
+  import { StackAction, type ControlAction } from "../stack_controls";
   import MaterialSymbolsAdd from "~icons/material-symbols/add";
   import { onMount } from "svelte";
-  import { switchStack } from "../stack_controls";
 
   //https://stackoverflow.com/a/65616230
   let query = "";
-  export const searchHandler = (e: KeyboardEvent) => {
+
+  export const searchHandler = (e: KeyboardEvent, stack_name: string) => {
+    let message: ControlAction;
     if ($filtered_res.length === 0) {
       if (e.ctrlKey) {
-        let success = tryCreateNewStack(query);
+        message = {
+          action: StackAction.Create,
+          stackName: stack_name,
+        };
       } else {
-        CreateAndSwitchStack(query);
+        message = {
+          action: StackAction.CreateAndSwitch,
+          stackName: stack_name,
+        };
       }
     } else {
       // if the user submits a partial match, open the first match
-      switchStack($filtered_res[0][0]);
+      message = {
+        action: StackAction.Switch,
+        stackName: $filtered_res[0][0],
+      };
     }
+    chrome.runtime.sendMessage(message);
   };
 
   export const stackClickHandler = (stack_name: string) => {
-    switchStack(stack_name);
+    chrome.runtime.sendMessage({
+      action: StackAction.Switch,
+      stackName: stack_name,
+    });
   };
 
+  export let closeHandler = async () => {};
+  let searchInput: HTMLInputElement;
   $: searchQuery.set(query);
   onMount(() => {
     storage.get().then((res) => {
       stack_list.set(res.stack_list);
     });
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        if (e.matches) {
+          document.body.classList.add("dark-mode");
+        } else {
+          document.body.classList.remove("dark-mode");
+        }
+      });
   });
 </script>
 
@@ -46,15 +72,25 @@ Desired functionality:
 <div class="stack-list">
   <input
     type="text"
+    bind:this={searchInput}
     bind:value={query}
     placeholder="Search stacks..."
     on:keydown={(e) => {
-      if (e.key === "Enter") {
-        // if the stack was created, clear the query
-        query = "";
-        storage.get().then((res) => {
-          console.log(res);
-        });
+      switch (e.key) {
+        case "Enter":
+          searchHandler(e, query);
+          query = "";
+          storage.get().then((res) => {
+            console.log(res);
+          });
+          closeHandler().then(() => {});
+          break;
+        case "Escape":
+          query = "";
+          closeHandler().then(() => {});
+          break;
+        default:
+          return;
       }
     }}
   />
@@ -62,7 +98,7 @@ Desired functionality:
   <ul>
     {#each $filtered_res as [stack_name, is_current], i}
       <li class={is_current ? "current-stack" : "stack-item"}>
-        <button on:click={() => stackClickHandler}>
+        <button on:click={() => stackClickHandler(stack_name)}>
           {stack_name}
         </button>
       </li>
@@ -72,20 +108,67 @@ Desired functionality:
  if no match (add new stack or somethign) -->
   <MaterialSymbolsAdd
     onclick={() => {
-      tryCreateNewStack(query);
+      stackClickHandler(query);
       query = "";
     }}
   />
 </div>
 
 <style>
-  .current-stack {
-    background-color: #fce;
-    padding: 8px;
-    border-bottom: 1px solid #ccc;
+  ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
   }
-  .stack-item {
-    padding: 8px;
-    border-bottom: 1px solid #ccc;
+  li {
+    width: 20%;
+    content: center;
+    margin: 10px 0 0;
+    border-radius: 10px;
+    display: inline-block;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .current-stack {
+      background-color: #f88;
+      padding: 8px;
+      display: block;
+      border: none;
+      width: 100%;
+      height: 100%;
+      border-bottom: 1px solid #ccc;
+    }
+    .stack-item {
+      padding: 8px;
+      width: 100%;
+      display: block;
+      text-align: center;
+      height: 100%;
+      border-bottom: 1px solid #aaa;
+      background-color: #232b2b;
+    }
+    button {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1rem;
+      color: white;
+    }
+  }
+  @media (prefers-color-scheme: light) {
+    .current-stack {
+      background-color: #fce;
+      padding: 8px;
+      border-bottom: 1px solid #ccc;
+    }
+    .stack-item {
+      padding: 8px;
+      border-bottom: 1px solid #ccc;
+    }
   }
 </style>

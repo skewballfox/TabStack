@@ -1,5 +1,32 @@
 import { storage } from "./storage";
+export type ControlAction = { action: StackAction, stackName: string };
+//TODO: impolement stack deletion
+export enum StackAction {
+    Create = "create-stack",
+    CreateAndSwitch = "create-and-switch-stack",
+    Switch = "switch-stack",
+}
+// TODO: implement responses and error handling
+enum ControlResponse {
+    Success,
+    StackExists,
+    StackDoesNotExist,
+}
 
+
+export async function stack_control_request_handler(request: ControlAction, sender: chrome.runtime.MessageSender) {
+    switch (request.action) {
+        case StackAction.Create:
+            await tryCreateNewStack(request.stackName);
+            break;
+        case StackAction.CreateAndSwitch:
+            await CreateAndSwitchStack(request.stackName);
+            break;
+        case StackAction.Switch:
+            await switchStack(request.stackName);
+            break;
+    }
+}
 
 /// Used to create a new stack with the given name, returns false if the stack already exists
 /// or is an empty string
@@ -71,6 +98,3 @@ export async function CreateAndSwitchStack(stackName: string) {
     }
 }
 
-export async function getBestMatch(searchQuery: string) {
-
-}
