@@ -1,11 +1,14 @@
+.html {
+  min-height: 100%;
+}
 @media (prefers-color-scheme: dark) {
-  .sidepanel {
+  .body {
     background-color: #333;
     color: #fff;
   }
 }
 @media (prefers-color-scheme: light) {
-  .sidepanel {
+  .body {
     background-color: #fff;
     color: #333;
   }

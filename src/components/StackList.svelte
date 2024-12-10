@@ -130,6 +130,11 @@ Desired functionality:
   }
 
   @media (prefers-color-scheme: dark) {
+    .stack-list {
+      background-color: #232b2b;
+      width: 100%;
+      color: white;
+    }
     .current-stack {
       background-color: #f88;
       padding: 8px;

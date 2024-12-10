@@ -17,9 +17,10 @@
 </script>
 
 {#if active}
-  <div class="overlay" on:keydown={keydownHandler}>
+  <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+  <dialog class="overlay" on:keydown={keydownHandler}>
     <StackList {closeHandler} />
-  </div>
+  </dialog>
 {/if}
 
 <style>
