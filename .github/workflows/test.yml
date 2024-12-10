@@ -15,8 +15,8 @@ jobs:
         with:
           version: latest
       # Install dependencies
-      - run: npm ci
+      - run: pnpm ci
       # Build
-      - run: npm run build
+      - run: pnpm run build
       # Test
-      - run: npm run check
+      - run: pnpm run check
