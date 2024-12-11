@@ -97,7 +97,7 @@ Desired functionality:
 
   <ul>
     {#each $filtered_res as [stack_name, is_current], i}
-      <li class={is_current ? "current-stack" : "stack-item"}>
+      <li class={is_current ? "stack-item current-stack" : "stack-item"}>
         <button on:click={() => stackClickHandler(stack_name)}>
           {stack_name}
         </button>
@@ -129,30 +129,30 @@ Desired functionality:
     display: inline-block;
   }
 
+  .stack-item {
+    border: none;
+    padding: 8px;
+    width: 100%;
+    display: block;
+    text-align: center;
+    height: 100%;
+    width: 100%;
+  }
+
   @media (prefers-color-scheme: dark) {
     .stack-list {
       background-color: #232b2b;
-      width: 100%;
       color: white;
     }
-    .current-stack {
-      background-color: #f88;
-      padding: 8px;
-      display: block;
-      border: none;
-      width: 100%;
-      height: 100%;
-      border-bottom: 1px solid #ccc;
-    }
+
     .stack-item {
-      padding: 8px;
-      width: 100%;
-      display: block;
-      text-align: center;
-      height: 100%;
       border-bottom: 1px solid #aaa;
-      background-color: #232b2b;
+      background-color: #000;
     }
+    .stack-item.current-stack {
+      border: 1px solid aqua;
+    }
+
     button {
       display: block;
       width: 100%;

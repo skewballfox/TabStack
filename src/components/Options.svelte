@@ -1,11 +1,19 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { storage, type Config } from "../storage";
 
-  export let tab_limit: number = 7;
+  let config: Config = {
+    tab_limit: 7,
+  };
+
   let successMessage: string | null = null;
 
+  onMount(() => {
+    storage.get_config().then((gconfig: Config) => {
+      config.tab_limit = gconfig.tab_limit;
+    });
+  });
   function save() {
-    const config = { tab_limit };
     storage.set_config(config).then(() => {
       successMessage = "Options saved!";
 
@@ -19,7 +27,7 @@
 <div class="container">
   <div>
     <label for="tab_limit">Set Tab Limit:</label>
-    <input type="number" bind:value={tab_limit} />
+    <input type="number" bind:value={config.tab_limit} />
     <button on:click={save}>Save</button>
     {#if successMessage}<span class="success">{successMessage}</span>{/if}
   </div>

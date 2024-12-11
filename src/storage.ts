@@ -6,7 +6,9 @@ type IStorage = {
     tab_limit: number;
 };
 export type Config = {
+    /// The maximum number of tabs that can be stored in a stack
     tab_limit: number;
+    
     
 };
   

@@ -1,3 +1,4 @@
+import { mount } from "svelte";
 import Options from "../components/Options.svelte";
 import { storage } from "../storage";
 
@@ -8,12 +9,12 @@ function render() {
     const target = document.getElementById("app");
 
     if (target) {
-        storage.get().then(({ tab_limit }) => {
-            new Options({
+        
+            mount(Options,{
                 target,
-                props: { tab_limit },
+                props: {  },
             });
-        });
+        
     }
 }
 
