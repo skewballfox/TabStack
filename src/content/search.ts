@@ -1,5 +1,4 @@
-import Overlay from "../components/Overlay.svelte";
-
+import Overlay from '../components/Overlay.svelte';
 
 // Content scripts
 // https://developer.chrome.com/docs/extensions/mv3/content_scripts/
@@ -11,4 +10,4 @@ import Overlay from "../components/Overlay.svelte";
 //storage.get().then(console.log);
 
 // Some svelte component on the page
-new Overlay({target: document.body});
+new Overlay({ target: document.body });

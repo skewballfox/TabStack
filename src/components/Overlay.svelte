@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { storage } from "../storage";
-  import { is_open } from "../content/state";
-  import StackList from "./StackList.svelte";
+  import { onMount } from 'svelte';
+  import { is_open } from '../content/state';
+  import StackList from './StackList.svelte';
   export let active: boolean = false;
   export let closeHandler = async () => {};
   $: is_open.subscribe((val) => {
@@ -10,7 +9,7 @@
   });
 
   const keydownHandler = (e: KeyboardEvent) => {
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       closeHandler();
     }
   };

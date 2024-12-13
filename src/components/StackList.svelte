@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { searchQuery, filtered_res, storage, stack_list } from "../storage";
+  import { searchQuery, filtered_res } from '../storage';
 
-  import { StackAction, type ControlAction } from "../stack_controls";
-  import MaterialSymbolsAdd from "~icons/material-symbols/add";
-  import { onMount } from "svelte";
+  import { StackAction, type ControlAction } from '../stack_controls';
+  import MaterialSymbolsAdd from '~icons/material-symbols/add';
+  import { onMount } from 'svelte';
 
   //https://stackoverflow.com/a/65616230
-  let query = "";
+  let query = '';
 
   export const searchHandler = (e: KeyboardEvent, stack_name: string) => {
     let message: ControlAction;
@@ -14,19 +14,19 @@
       if (e.ctrlKey) {
         message = {
           action: StackAction.Create,
-          stackName: stack_name,
+          stackName: stack_name
         };
       } else {
         message = {
           action: StackAction.CreateAndSwitch,
-          stackName: stack_name,
+          stackName: stack_name
         };
       }
     } else {
       // if the user submits a partial match, open the first match
       message = {
         action: StackAction.Switch,
-        stackName: $filtered_res[0][0],
+        stackName: $filtered_res[0][0]
       };
     }
     chrome.runtime.sendMessage(message);
@@ -35,24 +35,25 @@
   export const stackClickHandler = (stack_name: string) => {
     chrome.runtime.sendMessage({
       action: StackAction.Switch,
-      stackName: stack_name,
+      stackName: stack_name
     });
   };
 
   export let closeHandler = async () => {};
   let searchInput: HTMLInputElement;
   $: searchQuery.set(query);
+  interface Props {
+    closeHandler: () => Promise<void>;
+  }
+
   onMount(() => {
-    storage.get().then((res) => {
-      stack_list.set(res.stack_list);
-    });
     window
-      .matchMedia("(prefers-color-scheme: dark)")
-      .addEventListener("change", (e) => {
+      .matchMedia('(prefers-color-scheme: dark)')
+      .addEventListener('change', (e) => {
         if (e.matches) {
-          document.body.classList.add("dark-mode");
+          document.body.classList.add('dark-mode');
         } else {
-          document.body.classList.remove("dark-mode");
+          document.body.classList.remove('dark-mode');
         }
       });
   });
@@ -71,22 +72,20 @@ Desired functionality:
 <!-- https://kit.svelte.dev/docs/form-actions#progressive-enhancement -->
 <div class="stack-list">
   <input
+    class="search-bar"
     type="text"
     bind:this={searchInput}
     bind:value={query}
     placeholder="Search stacks..."
     on:keydown={(e) => {
       switch (e.key) {
-        case "Enter":
+        case 'Enter':
           searchHandler(e, query);
-          query = "";
-          storage.get().then((res) => {
-            console.log(res);
-          });
+          query = '';
           closeHandler().then(() => {});
           break;
-        case "Escape":
-          query = "";
+        case 'Escape':
+          query = '';
           closeHandler().then(() => {});
           break;
         default:
@@ -97,7 +96,7 @@ Desired functionality:
 
   <ul>
     {#each $filtered_res as [stack_name, is_current], i}
-      <li class={is_current ? "stack-item current-stack" : "stack-item"}>
+      <li class={is_current ? 'stack-item current-stack' : 'stack-item'}>
         <button on:click={() => stackClickHandler(stack_name)}>
           {stack_name}
         </button>
@@ -109,7 +108,7 @@ Desired functionality:
   <MaterialSymbolsAdd
     onclick={() => {
       stackClickHandler(query);
-      query = "";
+      query = '';
     }}
   />
 </div>
@@ -128,6 +127,13 @@ Desired functionality:
     border-radius: 10px;
     display: inline-block;
   }
+  .search-bar {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    /*border-bottom: 1px solid #ccc;*/
+    font-size: 1rem;
+  }
 
   .stack-item {
     border: none;
@@ -140,6 +146,10 @@ Desired functionality:
   }
 
   @media (prefers-color-scheme: dark) {
+    .search-bar {
+      background-color: #1d2222;
+      color: white;
+    }
     .stack-list {
       background-color: #232b2b;
       color: white;
