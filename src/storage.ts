@@ -1,10 +1,5 @@
 import { derived, writable, type Updater, type Writable } from 'svelte/store';
 
-type IStorage = {
-  stack_list: StackList;
-  config: Config;
-};
-
 export enum LimitStrategy {
   /// Close the oldest tab
   LRU = 'least-recently-used',
@@ -13,27 +8,29 @@ export enum LimitStrategy {
   /// close the newest tab without prompting the user
   auto = 'auto'
 }
-
+export enum SearchTool {
+  SidePanel = 'side-panel',
+  Overlay = 'overlay'
+}
 export type Config = {
   /// The maximum number of tabs that can be stored in a stack
   tab_limit: number;
   /// how to handle the limit being reached
   limit_strategy: LimitStrategy;
+  /// The Method used for searching and managing stacks
+  search_handler: SearchTool;
 };
 
 export const defaultConfig: Config = {
   tab_limit: 7,
-  limit_strategy: LimitStrategy.auto
+  limit_strategy: LimitStrategy.auto,
+  search_handler: SearchTool.SidePanel
 };
 
 export type StackList = {
   stacks: Record<string, Stack>;
   currentStack: string;
 };
-
-// type TabMetaData = {
-//     lastAccessed: Date;
-//     id: number;
 
 // }
 interface Stack {
@@ -92,7 +89,8 @@ export function persistentStore<T>(key: string, initialValue: T): Writable<T> {
 
 export const config = persistentStore<Config>('config', {
   tab_limit: 7,
-  limit_strategy: LimitStrategy.auto
+  limit_strategy: LimitStrategy.auto,
+  search_handler: SearchTool.SidePanel
 });
 
 export const stack_list = persistentStore<StackList>('stack_list', {

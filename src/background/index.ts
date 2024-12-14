@@ -1,5 +1,4 @@
-import { get } from 'svelte/store';
-import { stack_list, type StackList, config, LimitStrategy } from '../storage';
+import { stack_list, SearchTool, config, LimitStrategy } from '../storage';
 // more info on using dynamic content scripts with vite:
 // https://dev.to/jacksteamdev/advanced-config-for-rpce-3966#dynamic-content-scripts
 //import searchScript from "../content/search?script"
@@ -43,7 +42,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     console.log('Command:', command);
     console.log('Current tab:', current_tab);
     if (command === Command.SearchStacks) {
-      await sidePanelSearchHandler(current_tab);
+      await searchHandler(current_tab);
     }
   });
 
@@ -90,6 +89,28 @@ async function tryOpenTab(newtab: chrome.tabs.Tab) {
       // If the tab limit has been reached, close the appropriate tab
       console.log('limit reached: closing tab');
       evictTab(config.limit_strategy, tabs);
+    }
+  });
+}
+
+async function searchHandler(current_tab: chrome.tabs.Tab) {
+  config.subscribe(async (config) => {
+    switch (config.search_handler) {
+      case SearchTool.SidePanel:
+        sidePanelSearchHandler(current_tab);
+        break;
+      case SearchTool.Overlay:
+        chrome.permissions.contains(
+          { permissions: ['scripting'] },
+          (result) => {
+            if (result) {
+              overlaySearchHandler(current_tab);
+            } else {
+              console.error('Scripting permission not granted');
+            }
+          }
+        );
+        break;
     }
   });
 }

@@ -1,43 +1,17 @@
-# Svelte Typescript Chrome Extension Boilerplate
+# TabStack
 
-> Boilerplate for Chrome Extension Svelte Typescript project
+A working memory friedly tab manager. It limits the number of tabs that can be open at once, while making it easy to switch between task relevant tab groups
 
 ## Features
 
--   [Svelte](https://svelte.dev/)
--   [TypeScript](https://www.typescriptlang.org/)
--   [Vite](https://vitejs.dev/)
--   [CRXJS Vite Plugin](https://github.com/crxjs/chrome-extension-tools/blob/main/packages/vite-plugin/README.md)
--   [Chrome Extensions Manifest V3](https://developer.chrome.com/docs/extensions/mv3/intro/)
+- limit the number of tabs to a set amount (default is 7)
+- Choose different strategies for what to do once the tab limit is reached
+  - autoclose new tabs (currently implemented, default)
+  - close the least recently used tab (currently implemented)
+- switch between task-associated tab groups via the sidebar or an overlay (in progress, requires scripting permission)
 
-## Examples of integrations
+## Rationale
 
--   [Tailwind CSS](https://tailwindcss.com/) – is in the [tailwindcss](https://github.com/NekitCorp/chrome-extension-svelte-typescript-boilerplate/tree/tailwindcss) branch
+Working memory, the number of individual pieces of information we can juggle at once, is pretty limited; it's capacity is generally assumed to be around 7 items. Once that's exceeded, we start losing the ability to track relevant information, and [having trouble encoding the information into long term memory](https://cei.umn.edu/teaching-resources/leveraging-learning-sciences/working-memory-limited).
 
-## Development
-
-```bash
-# install dependencies
-npm i
-
-# build files to `/dist` directory
-# HMR for extension pages and content scripts
-npm run dev
-```
-
-## Build
-
-```bash
-# build files to `/dist` directory
-$ npm run build
-```
-
-## Load unpacked extensions
-
-[Getting Started Tutorial](https://developer.chrome.com/docs/extensions/mv3/getstarted/)
-
-1. Open the Extension Management page by navigating to `chrome://extensions`.
-2. Enable Developer Mode by clicking the toggle switch next to `Developer mode`.
-3. Click the `LOAD UNPACKED` button and select the `/dist` directory.
-
-![Example](https://wd.imgix.net/image/BhuKGJaIeLNPW9ehns59NfwqKxF2/vOu7iPbaapkALed96rzN.png?auto=format&w=571)
+When working on a task, limiting the number of tabs open to what you can actively track is arguably a good idea. This extension limits the number of tabs to a managable number, and makes it easy to switch between groups of tabs relevant to a specific task

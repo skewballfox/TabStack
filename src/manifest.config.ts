@@ -63,7 +63,7 @@ export default defineManifest(async (env) => ({
     'storage',
     'sidePanel',
     'tabs',
-    'scripting',
     'activeTab'
-  ] as chrome.runtime.ManifestPermissions[]
+  ] as chrome.runtime.ManifestPermissions[],
+  optional_permissions: ['scripting']
 }));
