@@ -1,35 +1,57 @@
-import { mount } from 'svelte';
+import { mount, unmount } from 'svelte';
 import Overlay from '../components/Overlay.svelte';
-import { is_open } from './state';
-//import { storage } from '../storage';
-
+import { writable } from 'svelte/store';
 // Content scripts
 // https://developer.chrome.com/docs/extensions/mv3/content_scripts/
 
 // Some global styles on the page
-import './styles.css';
-console.log('Content script loaded');
+//import './styles.css';
+import { searchAction } from '../stack_controls';
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  console.log(
-    sender.tab
-      ? 'from a content script:' + sender.tab.url
-      : 'from the extension'
-  );
-  if (request.greeting === 'open') {
-    is_open.set(true);
-    document.body.classList.add('background-overlay');
-  }
-  if (request.greeting === 'close') {
-    is_open.set(false);
-    document.body.classList.remove('background-overlay');
+function startOverlay() {
+  chrome.tabs.onActivated.addListener(function closeOnTabSwitch(activeInfo) {
+    chrome.runtime.sendMessage(searchAction.Close).then(() => {
+      chrome.tabs.onActivated.removeListener(closeOnTabSwitch);
+    });
+  });
+  mount(Overlay, {
+    target: document.body,
+    props: {
+      active: overlay_active,
+      closeHandler
+    }
+  });
+}
+console.log('Content script loaded');
+let overlay_active = writable(false);
+chrome.runtime.onMessage.addListener((action: searchAction) => {
+  switch (action) {
+    case searchAction.Open:
+      mount(Overlay, {
+        target: document.body,
+        props: {
+          active: overlay_active,
+          closeHandler
+        }
+      });
+      break;
+    case searchAction.Close:
+      unmount(Overlay);
+      break;
   }
 });
+
 // Some JS on the page
 //storage.get().then(console.log);
 const closeHandler = async () => {
-  chrome.runtime.sendMessage({ greeting: 'close' });
+  overlay_active.set(false);
 };
 // Some svelte component on the page
 //new Overlay({ target: document.body, props: { closeHandler: closeHandler } });
-mount(Overlay, { target: document.body, props: { closeHandler } });
+mount(Overlay, {
+  target: document.body,
+  props: {
+    active: overlay_active,
+    closeHandler
+  }
+});

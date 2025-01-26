@@ -65,5 +65,5 @@ export default defineManifest(async (env) => ({
     'tabs',
     'activeTab'
   ] as chrome.runtime.ManifestPermissions[],
-  optional_permissions: ['scripting']
+  optional_permissions: ['scripting'] as chrome.runtime.ManifestPermissions[]
 }));

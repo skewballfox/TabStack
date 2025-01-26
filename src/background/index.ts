@@ -3,6 +3,7 @@ import { stack_list, SearchTool, config, LimitStrategy } from '../storage';
 // https://dev.to/jacksteamdev/advanced-config-for-rpce-3966#dynamic-content-scripts
 //import searchScript from "../content/search?script"
 import {
+  searchAction,
   stack_control_request_handler,
   type ControlAction
 } from '../stack_controls';
@@ -34,6 +35,9 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   chrome.tabs.onCreated.addListener((tab) => {
     console.log('New tab created:', tab.id);
     tryOpenTab(tab);
+    if (tab.id) {
+      maybeInjectOverlay(tab);
+    }
   });
 
   // Set up listener for tab removal
@@ -56,13 +60,30 @@ chrome.runtime.onInstalled.addListener(async (details) => {
         ? 'from a content script:' + sender.tab.url
         : 'from the extension'
     );
-    stack_control_request_handler(request, sender);
+    stack_control_request_handler(request);
   });
 });
 
 enum Command {
   SearchStacks = 'search-stacks',
   pushTabToStack = 'push_tab_to_stack'
+}
+
+function maybeInjectOverlay(tab: chrome.tabs.Tab) {
+  config.subscribe(async (config) => {
+    if (config.search_handler === SearchTool.Overlay) {
+      chrome.permissions.contains({ permissions: ['scripting'] }, (result) => {
+        if (result) {
+          chrome.scripting.executeScript({
+            target: { tabId: tab.id ?? 0 },
+            files: ['content.js']
+          });
+        } else {
+          console.error('Scripting permission not granted');
+        }
+      });
+    }
+  });
 }
 
 async function evictTab(strat: LimitStrategy, tabs: chrome.tabs.Tab[]) {
@@ -73,7 +94,7 @@ async function evictTab(strat: LimitStrategy, tabs: chrome.tabs.Tab[]) {
         (a, b) => (a.lastAccessed ?? 0) - (b.lastAccessed ?? 0)
       )[-1];
       break;
-    case LimitStrategy.auto:
+    case LimitStrategy.NewestTab:
       tab = tabs.pop();
       break;
   }
@@ -128,7 +149,7 @@ async function sidePanelSearchHandler(current_tab: chrome.tabs.Tab) {
 
   chrome.tabs.onActivated.addListener(function closeOnTabSwitch(activeInfo) {
     if (activeInfo.tabId !== current_id) {
-      chrome.runtime.sendMessage('closeSidePanel').then(() => {
+      chrome.runtime.sendMessage(searchAction.Close).then(() => {
         chrome.tabs.onActivated.removeListener(closeOnTabSwitch);
       });
     }
@@ -141,7 +162,3 @@ async function overlaySearchHandler(current_tab: chrome.tabs.Tab) {
     chrome.tabs.sendMessage(current_tab.id, { greeting: 'open' });
   }
 }
-// NOTE: If you want to toggle the side panel from the extension's action button,
-// you can use the following code:
-// chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
-//    .catch((error) => console.error(error));

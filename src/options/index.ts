@@ -1,6 +1,6 @@
 import { mount } from 'svelte';
 import Options from '../components/Options.svelte';
-import { config } from '../storage';
+import { config, SearchTool } from '../storage';
 
 // Options
 // https://developer.chrome.com/docs/extensions/mv3/options/
@@ -14,6 +14,17 @@ function render() {
       props: { config }
     });
   }
+  document
+    .getElementById('search_tool_config')
+    ?.addEventListener(SearchTool.Overlay, () => {
+      chrome.permissions.request({ permissions: ['scripting'] }, (result) => {
+        if (result) {
+          console.log('Permission granted');
+        } else {
+          console.error('Permission not granted');
+        }
+      });
+    });
 }
 
 document.addEventListener('DOMContentLoaded', render);

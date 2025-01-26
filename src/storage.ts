@@ -6,7 +6,7 @@ export enum LimitStrategy {
   // /// open a popup to let user know the limit has been reached
   //popup = "popup",
   /// close the newest tab without prompting the user
-  auto = 'auto'
+  NewestTab = 'auto'
 }
 export enum SearchTool {
   SidePanel = 'side-panel',
@@ -23,13 +23,20 @@ export type Config = {
 
 export const defaultConfig: Config = {
   tab_limit: 7,
-  limit_strategy: LimitStrategy.auto,
+  limit_strategy: LimitStrategy.NewestTab,
   search_handler: SearchTool.SidePanel
 };
 
 export type StackList = {
   stacks: Record<string, Stack>;
   currentStack: string;
+};
+
+export type TabData = {
+  url: string;
+  title: string;
+  favIconUrl: string;
+  id: number;
 };
 
 // }
@@ -89,7 +96,7 @@ export function persistentStore<T>(key: string, initialValue: T): Writable<T> {
 
 export const config = persistentStore<Config>('config', {
   tab_limit: 7,
-  limit_strategy: LimitStrategy.auto,
+  limit_strategy: LimitStrategy.NewestTab,
   search_handler: SearchTool.SidePanel
 });
 

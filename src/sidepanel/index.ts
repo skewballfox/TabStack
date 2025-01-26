@@ -1,5 +1,6 @@
 import { mount } from 'svelte';
 import StackList from '../components/StackList.svelte';
+import { searchAction } from '../stack_controls';
 
 // Side panel
 // https://developer.chrome.com/docs/extensions/reference/sidePanel/
@@ -31,7 +32,7 @@ function render() {
   const target = document.getElementById('app');
 
   chrome.runtime.onMessage.addListener(function closeSidePanel(message) {
-    if (message === 'closeSidePanel') {
+    if (message === searchAction.Close) {
       chrome.runtime.onMessage.removeListener(closeSidePanel);
       window.close();
     }

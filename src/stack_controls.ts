@@ -7,10 +7,12 @@ export enum StackAction {
   Switch = 'switch-stack'
 }
 
-export async function stack_control_request_handler(
-  request: ControlAction,
-  sender: chrome.runtime.MessageSender
-) {
+export enum searchAction {
+  Open = 'open-search',
+  Close = 'close-search'
+}
+
+export async function stack_control_request_handler(request: ControlAction) {
   switch (request.action) {
     case StackAction.Create:
       await tryCreateNewStack(request.stackName);

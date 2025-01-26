@@ -1,6 +1,6 @@
 <script lang="ts">
   import { type Writable } from 'svelte/store';
-  import { type Config } from '../storage';
+  import { SearchTool, type Config } from '../storage';
 
   interface Props {
     config: Writable<Config>;
@@ -25,29 +25,32 @@
       <option value="lru"> Close the least recently used tab</option>
       <option value="auto"> Close the newest tab without prompting</option>
     </select>
-    <!-- <label for="search_tool">Stack Search Tool</label>
+    <label for="search_tool_config">Stack Search Tool</label>
     <select
       bind:value={$config.search_handler}
       onchange={() => {
-        if ($config.search_handler === 'overlay') {
-          chrome.permissions.request(
-            {
-              permissions: ['scripting']
-            },
-            (granted) => {
-              if (granted) {
-                console.log('Permission granted');
-              } else {
-                console.log('Permission denied');
-              }
+        console.log('onchange');
+        chrome.permissions.request(
+          {
+            permissions: ['scripting']
+          },
+          (granted) => {
+            if (granted) {
+              console.log('granted');
+            } else {
+              console.log('not granted');
             }
-          );
-        }
+          }
+        );
       }}
     >
-      <option value="sidepanel"> Search/Manage stacks via sidepanel</option>
-      <option value="overlay"> Search/Manage stacks via overlay</option>
-    </select> -->
+      <option value={SearchTool.SidePanel}>
+        Search/Manage stacks via sidepanel</option
+      >
+      <option class="overlay_select" value={SearchTool.Overlay}>
+        Search/Manage stacks via overlay</option
+      >
+    </select>
   </div>
 </div>
 
