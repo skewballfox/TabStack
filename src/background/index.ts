@@ -76,7 +76,7 @@ function maybeInjectOverlay(tab: chrome.tabs.Tab) {
         if (result) {
           chrome.scripting.executeScript({
             target: { tabId: tab.id ?? 0 },
-            files: ['content.js']
+            files: ['src/content/index.ts-loader.js']
           });
         } else {
           console.error('Scripting permission not granted');

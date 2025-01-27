@@ -14,17 +14,6 @@ function render() {
       props: { config }
     });
   }
-  document
-    .getElementById('search_tool_config')
-    ?.addEventListener(SearchTool.Overlay, () => {
-      chrome.permissions.request({ permissions: ['scripting'] }, (result) => {
-        if (result) {
-          console.log('Permission granted');
-        } else {
-          console.error('Permission not granted');
-        }
-      });
-    });
 }
 
 document.addEventListener('DOMContentLoaded', render);

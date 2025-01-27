@@ -7,6 +7,19 @@
   }
 
   let { config }: Props = $props();
+  document
+    .getElementById('search_tool_config')
+    ?.addEventListener('input', () => {
+      if ($config.search_handler === SearchTool.Overlay) {
+        chrome.permissions.request({ permissions: ['scripting'] }, (result) => {
+          if (result) {
+            console.log('Permission granted');
+          } else {
+            console.error('Permission not granted');
+          }
+        });
+      }
+    });
 </script>
 
 <div class="container">
@@ -25,24 +38,11 @@
       <option value="lru"> Close the least recently used tab</option>
       <option value="auto"> Close the newest tab without prompting</option>
     </select>
-    <label for="search_tool_config">Stack Search Tool</label>
+    <!-- <label for="search_tool_config" id="search_tool_config"
+      >Stack Search Tool</label
+    >
     <select
       bind:value={$config.search_handler}
-      onchange={() => {
-        console.log('onchange');
-        chrome.permissions.request(
-          {
-            permissions: ['scripting']
-          },
-          (granted) => {
-            if (granted) {
-              console.log('granted');
-            } else {
-              console.log('not granted');
-            }
-          }
-        );
-      }}
     >
       <option value={SearchTool.SidePanel}>
         Search/Manage stacks via sidepanel</option
@@ -50,7 +50,7 @@
       <option class="overlay_select" value={SearchTool.Overlay}>
         Search/Manage stacks via overlay</option
       >
-    </select>
+    </select> -->
   </div>
 </div>
 
